@@ -1,0 +1,4 @@
+grant codeBase "file:node/target/scala-2.13/classes/" {
+    permission java.security.AllPermission;
+    permission java.util.PropertyPermission "scala.reflect.classtag.cache.disable", "read,write";
+};

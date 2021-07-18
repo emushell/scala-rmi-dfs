@@ -1,0 +1,21 @@
+# User-specific stuff
+.idea/
+.bsp/
+
+# IntelliJ
+out/
+
+# mpeltonen/sbt-idea plugin
+.idea_modules/
+
+target/
+project/boot/
+project/plugins/project/
+.history
+.cache
+.lib/
+data/
+
+### Scala ###
+*.class
+*.log
