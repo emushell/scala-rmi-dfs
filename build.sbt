@@ -22,7 +22,9 @@ lazy val master = project
     name := "master",
     assembly / mainClass := Some("MasterNode"),
     libraryDependencies ++= Seq(dependencies.logging, dependencies.logback)
-  )
+  ).dependsOn(
+  config
+)
 
 lazy val node = project
   .in(file("node"))
@@ -32,9 +34,8 @@ lazy val node = project
     assembly / mainClass := Some("DataNode"),
     libraryDependencies ++= Seq(dependencies.logging, dependencies.logback)
   ).dependsOn(
-    master
-  )
-
+  master
+)
 
 lazy val client = project
   .in(file("client"))
@@ -48,6 +49,14 @@ lazy val client = project
   node
 )
 
+lazy val config = project
+  .in(file("config"))
+  .settings(
+    commonSettings,
+    name := "config",
+    libraryDependencies ++= Seq(dependencies.logging, dependencies.logback, dependencies.pureconfig)
+  )
+
 lazy val commonSettings = Seq(
   scalaVersion := "2.13.6",
   assemblyPackageScala / assembleArtifact := false,
@@ -57,7 +66,9 @@ lazy val commonSettings = Seq(
 lazy val dependencies = new {
   private val loggingV = "3.9.3"
   private val logbackV = "1.2.3"
+  private val pureconfigV = "0.16.0"
 
   val logback = "ch.qos.logback" % "logback-classic" % logbackV
   val logging = "com.typesafe.scala-logging" %% "scala-logging" % loggingV
+  val pureconfig = "com.github.pureconfig" %% "pureconfig" % pureconfigV
 }

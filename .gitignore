@@ -1,6 +1,7 @@
 # User-specific stuff
 .idea/
 .bsp/
+**/*.iml
 
 # IntelliJ
 out/

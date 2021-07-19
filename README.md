@@ -76,6 +76,14 @@ or
 2. Configuration part - such as block size, replication factor etc. Is hardcoded. If there is an interest to play a
    round a bit more, please be free to change the code yourself and recompile the project.
 
+### TODO:
+1. finish config
+2. consider all the rmi registry stuff take out as separate functionality
+3. would be nice the to use better approach node allocation for putting the blocks. As now, it is randomly. Could be also use wight how big is each node.
+4. fix issue with namespace and docker
+5. can think about some tree-like structure for namespace. (would be fancier)
+6. fix bugs and perhaps implement some new features...
+
 ### Some thoughts and problems which I encountered during development:
 
 1. If you are using or considering using Java RMI, and you do not know what kind of "animal" that is, be prepared to
@@ -107,5 +115,3 @@ or
 - [security manager](https://newbedev.com/java-no-security-manager-rmi-class-loader-disabled)
   and [this](https://stackoverflow.com/questions/6322107/java-no-security-manager-rmi-class-loader-disabled)
   
-
-

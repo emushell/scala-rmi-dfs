@@ -139,7 +139,7 @@ object Client {
             bufferedOutputStream.write(byteArray)
             bufferedOutputStream.flush()
           case Failure(ex) =>
-            logger.warn(s"Cannot reach node: ${nodeName}..., node down...")
+            logger.warn(s"Cannot reach node: $nodeName..., node down...")
             ex.printStackTrace()
             if (nodes.isEmpty) return
             readBlock(nodes.head, blockUUID, nodes.tail)
@@ -166,12 +166,12 @@ object Client {
         case None => deleteBlock(nodes.head, blockUUID, nodes.tail)
         case Some(node: DataService) => Try(node.remove(blockUUID, nodes)) match {
           case Success(result) => if (result) {
-            logger.info(s"block: ${blockUUID} deleted...")
+            logger.info(s"block: $blockUUID deleted...")
           } else {
-            logger.info(s"for some reason block: ${blockUUID} could not be deleted...")
+            logger.info(s"for some reason block: $blockUUID could not be deleted...")
           }
           case Failure(ex) =>
-            logger.warn(s"Cannot reach node: ${nodeName}..., node down...")
+            logger.warn(s"Cannot reach node: $nodeName..., node down...")
             ex.printStackTrace()
             if (nodes.isEmpty) return
             deleteBlock(nodes.head, blockUUID, nodes.tail)
@@ -230,11 +230,3 @@ object Client {
     }
   }
 }
-
-
-//        while (read != -1) {
-//          println(buffer.length, read)
-//          read = bufferedInputStream.read(buffer, 0, buffer.length)
-//          println(buffer.map(_.toChar).mkString)
-//
-//        }

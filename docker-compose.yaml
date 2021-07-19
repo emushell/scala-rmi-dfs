@@ -16,6 +16,7 @@ services:
       - ./node/target/scala-2.13/node_2.13.6-0.1.0-SNAPSHOT.jar:/code/node_2.13.6-0.1.0-SNAPSHOT.jar
       - ./policies/master.policy:/code/master.policy
       - ./data:/code/data
+      - ./conf:/code/conf
     command: scala -Djava.rmi.server.codebase=file:/code/node_2.13.6-0.1.0-SNAPSHOT.jar -Djava.security.policy=master.policy master_2.13.6-0.1.0-SNAPSHOT.jar
 
   scala-rmi-node1:
@@ -27,6 +28,7 @@ services:
       - ./node/target/scala-2.13/node_2.13.6-0.1.0-SNAPSHOT.jar:/code/node_2.13.6-0.1.0-SNAPSHOT.jar
       - ./policies/node.policy:/code/node.policy
       - ./data:/code/data
+      - ./conf:/code/conf
     command: scala -Djava.rmi.server.codebase=file:/code/master_2.13.6-0.1.0-SNAPSHOT.jar -Djava.security.policy=node.policy node_2.13.6-0.1.0-SNAPSHOT.jar DataNode1 10991
     depends_on:
       - "scala-rmi-master"
@@ -40,6 +42,7 @@ services:
       - ./node/target/scala-2.13/node_2.13.6-0.1.0-SNAPSHOT.jar:/code/node_2.13.6-0.1.0-SNAPSHOT.jar
       - ./policies/node.policy:/code/node.policy
       - ./data:/code/data
+      - ./conf:/code/conf
     command: scala -Djava.rmi.server.codebase=file:/code/master_2.13.6-0.1.0-SNAPSHOT.jar -Djava.security.policy=node.policy node_2.13.6-0.1.0-SNAPSHOT.jar DataNode2 10992
     depends_on:
       - "scala-rmi-master"
@@ -54,6 +57,7 @@ services:
       - ./node/target/scala-2.13/node_2.13.6-0.1.0-SNAPSHOT.jar:/code/node_2.13.6-0.1.0-SNAPSHOT.jar
       - ./policies/node.policy:/code/node.policy
       - ./data:/code/data
+      - ./conf:/code/conf
     command: scala -Djava.rmi.server.codebase=file:/code/master_2.13.6-0.1.0-SNAPSHOT.jar -Djava.security.policy=node.policy node_2.13.6-0.1.0-SNAPSHOT.jar DataNode3 10993
     depends_on:
       - "scala-rmi-master"

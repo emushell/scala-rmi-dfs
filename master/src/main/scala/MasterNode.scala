@@ -1,7 +1,7 @@
 import com.typesafe.scalalogging.Logger
 
 import java.io.{FileInputStream, FileOutputStream, ObjectInputStream, ObjectOutputStream}
-import java.nio.file.{Files, Paths}
+import java.nio.file.Files
 import java.rmi.Remote
 import java.rmi.registry.{LocateRegistry, Registry}
 import java.rmi.server.UnicastRemoteObject
@@ -43,17 +43,14 @@ trait MasterService extends Remote {
 
 sealed class MasterNode extends UnicastRemoteObject with MasterService {
   private val logger = Logger("MasterNode")
-  private val BlockSize: Int = 64
-  private val ReplicationFactor: Int = 3
+  private val conf = Configuration.dfsConfig
   private var fileTable: Map[String, List[Block]] = Map()
-  private val DumpDestination: String = "data/masterdump.bin"
 
   private val nodes: mutable.Map[String, Remote] = mutable.Map()
-  protected val masterHost: String = "localhost"
 
   if (System.getSecurityManager == null) System.setSecurityManager(new SecurityManager)
 
-  MasterNode.rebindMasterNodeToMasterRegistry(this, masterHost)
+  MasterNode.rebindMasterNodeToMasterRegistry(this)
   // todo: does not work - because of docker, need to fix
   suckUpDump()
   onShutDown()
@@ -64,7 +61,7 @@ sealed class MasterNode extends UnicastRemoteObject with MasterService {
   }
 
   override def registerNodes(nodeName: String, node: Remote): Unit = {
-    logger.info(s"Registering data node: ${nodeName} ...")
+    logger.info(s"Registering data node: $nodeName ...")
     nodes += (nodeName -> node)
     nodes.foreach(node => logger.info(node.toString))
   }
@@ -94,18 +91,18 @@ sealed class MasterNode extends UnicastRemoteObject with MasterService {
     nodes.keys.toList
   }
 
-  override def getBlockSize: Int = BlockSize
+  override def getBlockSize: Int = conf.blockSize.size
 
   override def exportFileTable(): Map[String, List[Block]] = fileTable
 
-  private def calculateBlockCount(size: Long): Long = math.ceil(size / BlockSize).toLong
+  private def calculateBlockCount(size: Long): Long = math.ceil(size / conf.blockSize.size).toLong
 
   private def allocateBlocks(blockCount: Long): List[Block] = {
     val blocks: ListBuffer[Block] = ListBuffer()
     val dataNodes = listDataNodeNames
 
     (0L to blockCount).foreach { _ =>
-      val shuffledDataNodes = Random.shuffle(dataNodes).take(ReplicationFactor)
+      val shuffledDataNodes = Random.shuffle(dataNodes).take(conf.replicationFactor.value)
       val block = Block(UUID.randomUUID(), shuffledDataNodes)
       blocks += block
     }
@@ -113,7 +110,7 @@ sealed class MasterNode extends UnicastRemoteObject with MasterService {
   }
 
   private def dumpFileTable(): Unit = {
-    val dest = Paths.get(DumpDestination)
+    val dest = conf.dumpDestination.path
     Files.createDirectories(dest.getParent)
     val fo = new FileOutputStream(dest.toFile)
     val oo = new ObjectOutputStream(fo)
@@ -133,7 +130,7 @@ sealed class MasterNode extends UnicastRemoteObject with MasterService {
   }
 
   private def suckUpDump(): Unit = {
-    val dest = Paths.get(DumpDestination)
+    val dest = conf.dumpDestination.path
     if (Files.exists(dest)) {
       logger.info("Reading binary file table dump...")
       val fi = new FileInputStream(dest.toFile)
@@ -148,24 +145,27 @@ sealed class MasterNode extends UnicastRemoteObject with MasterService {
 
 object MasterNode {
   private val logger = Logger("MasterNode")
-  private val masterRegistry: Registry = launchMasterRegistry()
+  private val conf = Configuration.dfsConfig
+  private val masterRegistry: Registry = launchMasterRegistry
 
   def apply(): MasterService = {
     new MasterNode
   }
 
-  private def rebindMasterNodeToMasterRegistry(service: MasterService, masterHost: String): Unit = {
-    Try(masterRegistry.rebind(s"rmi://${masterHost}:1099/MasterNode", service)) match {
+  private def rebindMasterNodeToMasterRegistry(service: MasterService): Unit = {
+    val rmiUrl = s"rmi://${conf.masterRmiHost.host}:${conf.masterRmiPort.port}/MasterNode"
+    logger.info(s"Master registry url: $rmiUrl")
+    Try(masterRegistry.rebind(rmiUrl, service)) match {
       case Success(_) => logger.info("MasterNode registered at Master RMI registry...")
       case Failure(ex) => ex.printStackTrace()
     }
   }
 
-  private def launchMasterRegistry(): Registry = {
+  private def launchMasterRegistry: Registry = {
     logger.info("Master RMI registry starting...")
-    LocateRegistry.createRegistry(1099) match {
+    LocateRegistry.createRegistry(conf.masterRmiPort.port) match {
       case registry: Registry => registry
-      case _ => println("Could not create Master registry!")
+      case _ => logger.error("Could not create Master registry!")
         sys.exit(0)
     }
   }
