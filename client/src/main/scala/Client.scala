@@ -52,7 +52,7 @@ object Client {
 
       Try(newNode.sayHelloFromNode()) match {
         case Success(message) => logger.info(message + " - " + node.toString)
-        case Failure(_) => logger.info(s"Node: ${node._1} cannot be reached..., node probably down...")
+        case Failure(ex) => logger.info(s"Node: ${node._1} cannot be reached..., node probably down...", ex)
       }
     }
   }
@@ -68,8 +68,7 @@ object Client {
   private def getMasterRegistry: Registry = {
     Try(LocateRegistry.getRegistry(masterHost, 1099)) match {
       case Success(registry) => registry
-      case Failure(ex) => logger.warn("Master registry could not be found!")
-        ex.printStackTrace()
+      case Failure(ex) => logger.warn("Master registry could not be found!", ex)
         sys.exit(0)
     }
   }
@@ -79,8 +78,7 @@ object Client {
     val masterRegistry = getMasterRegistry
     Try(masterRegistry.lookup(s"rmi://localhost:1099/MasterNode")) match {
       case Success(service: MasterService) => service
-      case Failure(ex) => logger.warn("MasterNode could not be found!")
-        ex.printStackTrace()
+      case Failure(ex) => logger.warn("MasterNode could not be found!", ex)
         sys.exit(0)
     }
   }
@@ -139,8 +137,7 @@ object Client {
             bufferedOutputStream.write(byteArray)
             bufferedOutputStream.flush()
           case Failure(ex) =>
-            logger.warn(s"Cannot reach node: $nodeName..., node down...")
-            ex.printStackTrace()
+            logger.error(s"Cannot reach node: $nodeName..., node down...", ex)
             if (nodes.isEmpty) return
             readBlock(nodes.head, blockUUID, nodes.tail)
         }
@@ -171,8 +168,7 @@ object Client {
             logger.info(s"for some reason block: $blockUUID could not be deleted...")
           }
           case Failure(ex) =>
-            logger.warn(s"Cannot reach node: $nodeName..., node down...")
-            ex.printStackTrace()
+            logger.error(s"Cannot reach node: $nodeName..., node down...", ex)
             if (nodes.isEmpty) return
             deleteBlock(nodes.head, blockUUID, nodes.tail)
         }

@@ -157,15 +157,15 @@ object MasterNode {
     logger.info(s"Master registry url: $rmiUrl")
     Try(masterRegistry.rebind(rmiUrl, service)) match {
       case Success(_) => logger.info("MasterNode registered at Master RMI registry...")
-      case Failure(ex) => ex.printStackTrace()
+      case Failure(ex) => logger.error("Could not rebind Master node to RMI registry...", ex)
     }
   }
 
   private def launchMasterRegistry: Registry = {
     logger.info("Master RMI registry starting...")
-    LocateRegistry.createRegistry(conf.masterRmiPort.port) match {
-      case registry: Registry => registry
-      case _ => logger.error("Could not create Master registry!")
+    Try(LocateRegistry.createRegistry(conf.masterRmiPort.port)) match {
+      case Success(registry: Registry) => registry
+      case Failure(ex) => logger.error("Could not create Master registry!", ex)
         sys.exit(0)
     }
   }

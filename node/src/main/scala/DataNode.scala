@@ -103,8 +103,7 @@ object DataNode {
     val rmiUri = s"rmi://${conf.masterRmiHost.host}:${conf.masterRmiPort.port}/MasterNode"
     Try(masterRegistry.lookup(rmiUri)) match {
       case Success(masterNode: MasterService) => masterNode
-      case Failure(ex) => logger.warn("Could not lookup MasterNode in master RMI..")
-        ex.printStackTrace()
+      case Failure(ex) => logger.error("Could not lookup MasterNode in master RMI..", ex)
         sys.exit(0)
     }
   }
@@ -118,7 +117,7 @@ object DataNode {
     logger.info(s"Node registry url: $rmiUrl")
     Try(nodeRegistry.rebind(rmiUrl, service)) match {
       case Success(_) => logger.info(s"$nodeName added to data node RMI registry...")
-      case Failure(ex) => ex.printStackTrace()
+      case Failure(ex) => logger.error("Could not add node to RMI registry...", ex)
     }
   }
 
