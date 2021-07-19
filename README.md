@@ -59,8 +59,8 @@ There is a set of commands which are implemented in the system. Not much but for
 
 ### Thing to take notice / remember:
 
-1. As the dfs system runs in docker containers, and the nodes physically are not separate machines. You might end up
-   in networking issues. There might be a necessity to make seme tweaks in your hosts file (on Ubuntu ```/etc/hosts```),
+1. As the dfs system runs in docker containers, and the nodes physically are not separate machines. You might end up in
+   networking issues. There might be a necessity to make seme tweaks in your hosts file (on Ubuntu ```/etc/hosts```),
    something like this:
 
 ```shell
@@ -73,13 +73,16 @@ or
 0.0.0.0   scala-rmi-master scala-rmi-node1 scala-rmi-node2 scala-rmi-node3
 ```
 
-2. Configuration part - such as block size, replication factor etc. Is hardcoded. If there is an interest to play a
-   round a bit more, please be free to change the code yourself and recompile the project.
+2. Configuration part - such as block size, replication factor etc., you can change in conf/application.conf file. Any
+   way there is still a default configuration in the project, but any of values you wish to change then please do so in
+   the mentioned directory.
 
 ### TODO:
+
 1. finish config
 2. consider all the rmi registry stuff take out as separate functionality
-3. would be nice the to use better approach node allocation for putting the blocks. As now, it is randomly. Could be also use wight how big is each node.
+3. would be nice the to use better approach node allocation for putting the blocks. As now, it is randomly. Could be
+   also use wight how big is each node.
 4. fix issue with namespace and docker
 5. can think about some tree-like structure for namespace. (would be fancier)
 6. fix bugs and perhaps implement some new features...
@@ -106,9 +109,10 @@ or
 5. Keep in mind that with Java RMI you cannot bind your remote nodes to some master RMI registry which is on a separate
    machine. Java RMI just does not work like that. You can bind only apps which are on the same host. So it means for
    each node you have to have its own separate RMI registry and keep additional registry object in the master node which
-   gives you information about all the other nodes. Exception which you could get if ignoring this, could look
-   something like this: ```java.rmi.AccessException: Registry.rebind disallowed; origin /172.30.0.3 is non-local host```
+   gives you information about all the other nodes. Exception which you could get if ignoring this, could look something
+   like this: ```java.rmi.AccessException: Registry.rebind disallowed; origin /172.30.0.3 is non-local host```
 6. Some useful resources which I found for my self during the project
+
 - [accesscontrolexception access denied](https://stackoverflow.com/questions/2427473/java-rmi-accesscontrolexception-access-denied)
 - [codebase](https://docs.oracle.com/javase/7/docs/technotes/guides/rmi/codebase.html)
 - [tutorial rmi](https://docs.oracle.com/javase/tutorial/rmi/running.html)
