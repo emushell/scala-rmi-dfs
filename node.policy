@@ -1,4 +1,12 @@
-grant codeBase "file:node/target/scala-2.13/classes/" {
+grant {
     permission java.security.AllPermission;
-    permission java.util.PropertyPermission "scala.reflect.classtag.cache.disable", "read,write";
+    permission java.net.SocketPermission "localhost:1099", "connect, resolve";
+    permission java.net.SocketPermission "localhost:1024-", "connect, resolve";
+    permission java.net.SocketPermission "localhost:1024-", "accept, resolve";
+    permission java.net.SocketPermission "127.0.0.1:1099", "connect, resolve";
+    permission java.net.SocketPermission "127.0.0.1:1024-", "connect, resolve";
+    permission java.net.SocketPermission "127.0.0.1:1024-", "accept, resolve";
+    permission java.net.SocketPermission "0.0.0.0:1099", "connect, resolve";
+    permission java.net.SocketPermission "0.0.0.0:1024-", "connect, resolve";
+    permission java.net.SocketPermission "0.0.0.0:1024-", "accept, resolve";
 };

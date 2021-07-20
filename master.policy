@@ -1,8 +1,12 @@
-grant codeBase "file:master/target/scala-2.13/classes/" {
+grant  {
     permission java.security.AllPermission;
-    permission java.net.SocketPermission "*", "connect, resolve";
     permission java.net.SocketPermission "localhost:1099", "connect, resolve";
+    permission java.net.SocketPermission "localhost:1024-", "connect, resolve";
+    permission java.net.SocketPermission "localhost:1024-", "accept, resolve";
     permission java.net.SocketPermission "127.0.0.1:1099", "connect, resolve";
-    permission java.net.SocketPermission "localhost:80", "connect, resolve";
-    permission java.util.PropertyPermission "*", "read,write";
+    permission java.net.SocketPermission "127.0.0.1:1024-", "connect, resolve";
+    permission java.net.SocketPermission "127.0.0.1:1024-", "accept, resolve";
+    permission java.net.SocketPermission "0.0.0.0:1099", "connect, resolve";
+    permission java.net.SocketPermission "0.0.0.0:1024-", "connect, resolve";
+    permission java.net.SocketPermission "0.0.0.0:1024-", "accept, resolve";
 };
