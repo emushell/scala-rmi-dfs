@@ -153,7 +153,7 @@ object MasterNode {
   }
 
   private def rebindMasterNodeToMasterRegistry(service: MasterService): Unit = {
-    val rmiUrl = s"rmi://${conf.masterRmiHost.host}:${conf.masterRmiPort.port}/MasterNode"
+    val rmiUrl = s"rmi://${conf.masterRmi.host}:${conf.masterRmi.port}/MasterNode"
     logger.info(s"Master registry url: $rmiUrl")
     Try(masterRegistry.rebind(rmiUrl, service)) match {
       case Success(_) => logger.info("MasterNode registered at Master RMI registry...")
@@ -163,9 +163,9 @@ object MasterNode {
 
   private def launchMasterRegistry: Registry = {
     logger.info("Master RMI registry starting...")
-    Try(LocateRegistry.createRegistry(conf.masterRmiPort.port)) match {
+    Try(LocateRegistry.createRegistry(conf.masterRmi.port)) match {
       case Success(registry: Registry) => registry
-      case Failure(ex) => logger.error("Could not create Master registry!", ex)
+      case Failure(ex) => logger.error("Could not create Master registry", ex)
         sys.exit(0)
     }
   }

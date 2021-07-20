@@ -82,38 +82,40 @@ sealed class DataNode(port: Int, nodeName: String) extends UnicastRemoteObject(p
 object DataNode {
   private val logger: Logger = Logger("DataNode")
   private val conf = Configuration.dfsConfig
+  private val DefaultNodePort = 10991
   private val nodeRegistry: Registry = createNodeRegistry
 
   def apply(): DataService = apply("DataNode")
 
-  def apply(nodeName: String): DataService = apply(10991, nodeName)
+  def apply(nodeName: String): DataService = apply(DefaultNodePort, nodeName)
 
   def apply(port: Int, nodeName: String): DataService = new DataNode(port, nodeName)
 
   private def getMasterRegistry: Registry = {
-    LocateRegistry.getRegistry(conf.masterHost.host, conf.masterRmiPort.port) match {
-      case registry: Registry => registry
-      case _ => logger.warn("Master registry could not be found!")
+    logger.info(s"Reaching out to MasterNode master RMI registry: ${conf.masterHost.host}:${conf.masterRmi.port}")
+    Try(LocateRegistry.getRegistry(conf.masterHost.host, conf.masterRmi.port)) match {
+      case Success(registry: Registry) => registry
+      case Failure(ex) => logger.warn("Master registry could not be found...", ex)
         sys.exit(0)
     }
   }
 
   private def lookupMasterNode: MasterService = {
     val masterRegistry = getMasterRegistry
-    val rmiUri = s"rmi://${conf.masterRmiHost.host}:${conf.masterRmiPort.port}/MasterNode"
+    val rmiUri = s"rmi://${conf.masterRmi.host}:${conf.masterRmi.port}/MasterNode"
     Try(masterRegistry.lookup(rmiUri)) match {
       case Success(masterNode: MasterService) => masterNode
-      case Failure(ex) => logger.error("Could not lookup MasterNode in master RMI..", ex)
+      case Failure(ex) => logger.error(s"Could not lookup MasterNode in master RMI: $rmiUri", ex)
         sys.exit(0)
     }
   }
 
   private def createNodeRegistry: Registry = {
-    LocateRegistry.createRegistry(conf.nodeRmiPort.port)
+    LocateRegistry.createRegistry(conf.nodeRmi.port)
   }
 
   private def rebindDataNodeToNodeRegistry(service: DataService, nodeName: String): Unit = {
-    val rmiUrl = s"rmi://${conf.nodeRmiHost.host}:${conf.nodeRmiPort.port}/$nodeName"
+    val rmiUrl = s"rmi://${conf.nodeRmi.host}:${conf.nodeRmi.port}/$nodeName"
     logger.info(s"Node registry url: $rmiUrl")
     Try(nodeRegistry.rebind(rmiUrl, service)) match {
       case Success(_) => logger.info(s"$nodeName added to data node RMI registry...")
@@ -123,13 +125,13 @@ object DataNode {
 
   private def registerNodeToMaster(nodeName: String): Unit = {
     val masterNode = lookupMasterNode
-    val rmiUrl = s"rmi://${conf.nodeRmiHost.host}:${conf.nodeRmiPort.port}/$nodeName"
+    val rmiUrl = s"rmi://${conf.nodeRmi.host}:${conf.nodeRmi.port}/$nodeName"
     val node = nodeRegistry.lookup(rmiUrl)
     masterNode.registerNodes(nodeName, node)
   }
 
   private def removeNodeFromRegistry(nodeName: String): Unit = {
-    val rmiUrl = s"rmi://${conf.nodeRmiHost.host}:${conf.nodeRmiPort.port}/$nodeName"
+    val rmiUrl = s"rmi://${conf.nodeRmi.host}:${conf.nodeRmi.port}/$nodeName"
     Runtime.getRuntime.addShutdownHook(new Thread {
       override def run(): Unit = {
         logger.info(s"Remove data node: $nodeName from node registry...")

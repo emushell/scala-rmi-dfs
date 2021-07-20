@@ -43,8 +43,28 @@ object Command {
 
 object Client {
   private val logger = Logger("Client")
-  private val masterHost: String = "scala-rmi-master"
+  private val conf = Configuration.dfsConfig
   private val mastersNode: MasterService = lookupMasterNode()
+
+  private def getMasterRegistry: Registry = {
+    logger.info(s"Reaching out to MasterNode master RMI registry: ${conf.masterHost.host}:${conf.masterRmi.port}")
+    Try(LocateRegistry.getRegistry(conf.masterHost.host, conf.masterRmi.port)) match {
+      case Success(registry) => registry
+      case Failure(ex) => logger.error("Master registry could not be found", ex)
+        sys.exit(0)
+    }
+  }
+
+  private def lookupMasterNode(): MasterService = {
+    val masterRegistry = getMasterRegistry
+    val rmiUrl = s"rmi://${conf.masterRmi.host}:${conf.masterRmi.port}/MasterNode"
+    logger.info(s"Looking up MasterNode at: $rmiUrl")
+    Try(masterRegistry.lookup(rmiUrl)) match {
+      case Success(service: MasterService) => service
+      case Failure(ex) => logger.error(s"MasterNode could not be found in Master RMI registry at: $rmiUrl", ex)
+        sys.exit(0)
+    }
+  }
 
   private def listDataNodes(): Unit = {
     mastersNode.listRegisteredDataNodes.foreach { node =>
@@ -52,7 +72,7 @@ object Client {
 
       Try(newNode.sayHelloFromNode()) match {
         case Success(message) => logger.info(message + " - " + node.toString)
-        case Failure(ex) => logger.info(s"Node: ${node._1} cannot be reached..., node probably down...", ex)
+        case Failure(ex) => logger.warn(s"Node: ${node._1} cannot be reached..., node probably down...", ex)
       }
     }
   }
@@ -62,24 +82,6 @@ object Client {
       logger.info(s"File: ${file._1}")
       logger.info("blocks: ")
       file._2.foreach(block => logger.info(block.toString))
-    }
-  }
-
-  private def getMasterRegistry: Registry = {
-    Try(LocateRegistry.getRegistry(masterHost, 1099)) match {
-      case Success(registry) => registry
-      case Failure(ex) => logger.warn("Master registry could not be found!", ex)
-        sys.exit(0)
-    }
-  }
-
-  private def lookupMasterNode(): MasterService = {
-    logger.info("Setting up MasterNode...")
-    val masterRegistry = getMasterRegistry
-    Try(masterRegistry.lookup(s"rmi://localhost:1099/MasterNode")) match {
-      case Success(service: MasterService) => service
-      case Failure(ex) => logger.warn("MasterNode could not be found!", ex)
-        sys.exit(0)
     }
   }
 

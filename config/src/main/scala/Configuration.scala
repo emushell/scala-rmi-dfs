@@ -6,23 +6,17 @@ import java.nio.file.{Path, Paths}
 
 
 case class BlockSize(size: Int) extends AnyVal
-
 case class ReplicationFactor(value: Int) extends AnyVal
-
-case class MasterRmiHost(host: String) extends AnyVal
-case class MasterRmiPort(port: Int) extends AnyVal
-case class NodeRmiHost(host: String) extends AnyVal
-case class NodeRmiPort(port: Int) extends AnyVal
+case class MasterRmi(host: String, port: Int)
+case class NodeRmi(host: String, port: Int)
 case class MasterHost(host: String) extends AnyVal
 
 case class DumpDestination(path: Path) extends AnyVal
 
 case class DFSConf(blockSize: BlockSize,
                    replicationFactor: ReplicationFactor,
-                   masterRmiHost: MasterRmiHost,
-                   masterRmiPort: MasterRmiPort,
-                   nodeRmiHost: NodeRmiHost,
-                   nodeRmiPort: NodeRmiPort,
+                   masterRmi: MasterRmi,
+                   nodeRmi: NodeRmi,
                    masterHost: MasterHost,
                    dumpDestination: DumpDestination
                   )
