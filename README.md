@@ -81,9 +81,9 @@ or
 
 1. finish config
 2. consider all the rmi registry stuff take out as separate functionality
-3. would be nice the to use better approach node allocation for putting the blocks. As now, it is randomly. Could be
-   also use wight how big is each node.
-4. fix issue with namespace and docker
+3. would be nice the to use better approach node allocation for putting the blocks. As now, it is randomly. Could
+   also use how much each node weights.
+4. fix issue with namespace and docker (dump destination)
 5. can think about some tree-like structure for namespace. (would be fancier)
 6. fix bugs and perhaps implement some new features...
 
